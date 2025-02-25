@@ -1,0 +1,441 @@
+package sistemareservacion;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+public class SistemaReservacion {
+    public static void main(String[] args) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("Bienvenido al Sistema RHH ");
+        System.out.println("Elige una opción");
+        int opcion = 0;
+        ArrayList<Habitacion> lista_habitaciones = new ArrayList<Habitacion>();
+        ArrayList<Reservacion> lista_reservaciones = new ArrayList<Reservacion>();
+        lista_habitaciones.add(new Habitacion(4,2,true,5,1000.00,500.00,true,1));
+        lista_habitaciones.add(new Habitacion(2,2,true,3,900.00,400.00,true,1));
+        lista_habitaciones.add(new Habitacion(4,2,true,5,1300.00,600.00,true,2));
+                    
+        do{
+            System.out.println("0.- Salir del sistema");
+            System.out.println("1.- Agregar habitación al sistema");
+            System.out.println("2.- Listar habitaciones del sistema");
+            System.out.println("3.- Registrar reservación");
+            System.out.println("4.- Lista de reservaciones");
+            System.out.println("5.- Reporte de reservaciones");
+             System.out.println("10.- Listar habitaciones del sistema");
+            opcion = Integer.parseInt(reader.readLine());
+            switch(opcion){
+                case 1:
+                    System.out.println("Agregar habitación");
+                    int cantidad_habitacion_registrar = 0;
+                    System.out.println("Indica la cantidad de habitacione a agregar");
+                    cantidad_habitacion_registrar =  Integer.parseInt(reader.readLine());
+                    for(int i = 0; i < cantidad_habitacion_registrar; i++){
+                        // habitación por habitación, una por una
+                        System.out.println("Indica la cantidad cantidad_huespedes de la habitación " + (i + 1) );
+                        int cantidad_huespedes =  Integer.parseInt(reader.readLine());
+                        System.out.println("Indica la cantidad numero_camas de la habitación " + (i + 1) );
+                        int numero_camas =  Integer.parseInt(reader.readLine());
+                        
+                        Habitacion nueva_habitacion = new Habitacion();
+                        nueva_habitacion.setCantidad_huespedes(cantidad_huespedes);
+                        nueva_habitacion.setNumero_camas(numero_camas);
+                        lista_habitaciones.add(nueva_habitacion);
+                    }
+                    //System.out.println(lista_habitaciones);
+                    break;
+                case 2:
+                    System.out.println("Lista de habitaciones");
+                    //System.out.println("boolean test --> " + lista_habitaciones.isEmpty());
+                    if(lista_habitaciones.isEmpty()){
+                        System.out.println("No hay habitaciones registradas");
+                    }else{
+                        for(int i = 0; i < lista_habitaciones.size(); i++){
+                            System.out.println(lista_habitaciones.get(i).toString());
+                        }
+                    }
+                    //lista_habitaciones.forEach(habitacion -> System.out.println("getCantidad_huespedes: " + habitacion.getCantidad_huespedes()));
+                    break;
+                case 3:
+                    System.out.println("Nueva reservación");
+                    try {
+                        System.out.println("Indica el numero de habitación a reservar");
+                        int numero_habitacion = Integer.parseInt(reader.readLine());
+                        Habitacion habitacion_reservada = null;
+                        
+                        for(int i = 0; i < lista_habitaciones.size(); i++){
+                            if(lista_habitaciones.get(i).getId() == numero_habitacion){
+                                habitacion_reservada = lista_habitaciones.get(i);
+                                break;
+                            }
+                        }
+                        if(habitacion_reservada == null){
+                            System.out.println("Error, no existe la habitación buscada");
+                            break;
+                        }
+                        
+                        System.out.println("Indica la cantidad de noches");
+                        int cantidad_noches = Integer.parseInt(reader.readLine());
+                        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy"); // Formato de fecha
+                        System.out.println("Indica la fecha de inicio de reservación: ");
+                        String fechaTextoInicio = reader.readLine();
+                        System.out.println("Indica la fecha de fin de reservación: ");
+                        String fechaTextoFin = reader.readLine();
+                        Date fecha_inicio = formatter.parse(fechaTextoInicio); // Convertir a Date
+                        Date fecha_fin = formatter.parse(fechaTextoFin); // Convertir a Date
+                        
+                        System.out.println("Indica la cantidad de huespedes");
+                        int numero_huespedes = Integer.parseInt(reader.readLine());
+                        while(numero_huespedes <= 0){
+                            System.out.println("Error, cantidad de huespede invalido");
+                            numero_huespedes = Integer.parseInt(reader.readLine());
+                        }
+                        while(numero_huespedes > habitacion_reservada.getNumero_maximo_huespedes()){
+                            System.out.println("Error, ingresa una cantidad menor de huespedes");
+                            numero_huespedes = Integer.parseInt(reader.readLine());
+                        }
+                        ArrayList<Huespedes> lista_huespedes = new ArrayList<Huespedes>();
+                        for(int i = 0; i < numero_huespedes; i++){
+                            System.out.println("Datos del huesped " + (i+1));
+                            System.out.println("Indica el nombre del huesped");
+                            String nombre_huesped = reader.readLine();
+                            System.out.println("Indica la edad del huesped");
+                            int edad = Integer.parseInt(reader.readLine());
+                            System.out.println("Indica si es el reservante(1) / normal (2)");
+                            int reservante = Integer.parseInt(reader.readLine());
+                            lista_huespedes.add(new Huespedes(nombre_huesped, edad, reservante));
+                        }
+                        double costo_reservacion = cantidad_noches * habitacion_reservada.getPrecio_noche();
+                        lista_reservaciones.add(new Reservacion(numero_huespedes, habitacion_reservada.getNumero_camas(), habitacion_reservada, fecha_inicio, fecha_fin,lista_huespedes, 0));
+                        System.out.println("Reservación guardada exitosamente");
+                        
+                    } catch (IOException e) {
+                        System.out.println("Error de entrada/salida: " + e.getMessage());
+                    } catch (ParseException e) {
+                        System.out.println("Formato de fecha inválido. Use dd/MM/yyyy.");
+                    }
+                    
+                    
+                    break;
+                case 4:
+                    System.out.println("Listado de reservaciones");
+                    if(lista_reservaciones.isEmpty()){
+                        System.out.println("No hay reservaciones registradas");
+                    }else{
+                        for(int i = 0; i < lista_reservaciones.size(); i++){
+                            lista_reservaciones.get(i).mostrarDetalleReservacion();
+                        }
+                    }
+                    break;
+                case 5:
+                    System.out.println("Reporte del día");
+                    System.out.println("Cantidad de reservaciones " + lista_reservaciones.size());
+                    double cobro_total = 0;
+                    for(int i = 0; i < lista_reservaciones.size(); i++){
+                        cobro_total = lista_reservaciones.get(i).getCosto_reservacion();
+                    }
+                    System.out.println("Total cobrado: " + cobro_total);
+                    
+                case 10:
+                    break;
+                default:
+                    if(opcion != 0) // sí opcion es diferente a 0 ?
+                        System.out.println("Opción no valida");
+                    break;
+            }
+        }while(opcion != 0); 
+        
+        /* 
+            for(){} // se sabe cuantas veces se va a repetir
+            while(){} // no se sabe cuantas veces pero si se cumple lo que esta dentro de los paretesis el ciclo se termina
+            do ... while(); // no se sabe cuantas veces pero si se cumple lo que esta dentro de los paretesis el ciclo se termina
+        
+        */
+    } 
+}
+
+
+
+
+
+
+
+
+
+package sistemareservacion;
+
+public class Habitacion {
+    // atributos
+    private int cantidad_huespedes;
+    private int numero_camas;
+    private boolean disponibilidad;
+    private int numero_maximo_huespedes;
+    private double precio_noche;
+    private double precio_adicional_persona;
+    private boolean disponibilidad_banio;
+    private int tipo_habitacion; // 1 sencilla , 2 doble
+    private int id;
+    private static int conteo = 1;
+
+    // Constructores
+    public Habitacion() {
+    }
+
+    public Habitacion(int cantidad_huespedes, int numero_camas, boolean disponibilidad, int numero_maximo_huespedes, double precio_noche, double precio_adicional_persona, boolean disponibilidad_banio, int tipo_habitacion) {
+        this.cantidad_huespedes = cantidad_huespedes;
+        this.numero_camas = numero_camas;
+        this.disponibilidad = disponibilidad;
+        this.numero_maximo_huespedes = numero_maximo_huespedes;
+        this.precio_noche = precio_noche;
+        this.precio_adicional_persona = precio_adicional_persona;
+        this.disponibilidad_banio = disponibilidad_banio;
+        this.tipo_habitacion = tipo_habitacion;
+        this.id = conteo++;
+    }
+
+    @Override
+    public String toString() {
+        return "Habitacion{" + "cantidad_huespedes=" + cantidad_huespedes + ", numero_camas=" + numero_camas + ", disponibilidad=" + disponibilidad + ", numero_maximo_huespedes=" + numero_maximo_huespedes + ", precio_noche=" + precio_noche + ", precio_adicional_persona=" + precio_adicional_persona + ", disponibilidad_banio=" + disponibilidad_banio + ", tipo_habitacion=" + tipo_habitacion + ", id=" + id + '}';
+    }
+    
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+  
+    public int getCantidad_huespedes() {
+        return cantidad_huespedes;
+    }
+
+    public void setCantidad_huespedes(int cantidad_huespedes) {
+        this.cantidad_huespedes = cantidad_huespedes;
+    }
+
+    public int getNumero_camas() {
+        return numero_camas;
+    }
+
+    public void setNumero_camas(int numero_camas) {
+        this.numero_camas = numero_camas;
+    }
+
+    public boolean isDisponibilidad() {
+        return disponibilidad;
+    }
+
+    public void setDisponibilidad(boolean disponibilidad) {
+        this.disponibilidad = disponibilidad;
+    }
+
+    public int getNumero_maximo_huespedes() {
+        return numero_maximo_huespedes;
+    }
+
+    public void setNumero_maximo_huespedes(int numero_maximo_huespedes) {
+        this.numero_maximo_huespedes = numero_maximo_huespedes;
+    }
+
+    public double getPrecio_noche() {
+        return precio_noche;
+    }
+
+    public void setPrecio_noche(double precio_noche) {
+        this.precio_noche = precio_noche;
+    }
+
+    public double getPrecio_adicional_persona() {
+        return precio_adicional_persona;
+    }
+
+    public void setPrecio_adicional_persona(double precio_adicional_persona) {
+        this.precio_adicional_persona = precio_adicional_persona;
+    }
+
+    public boolean isDisponibilidad_banio() {
+        return disponibilidad_banio;
+    }
+
+    public void setDisponibilidad_banio(boolean disponibilidad_banio) {
+        this.disponibilidad_banio = disponibilidad_banio;
+    }
+
+    public int getTipo_habitacion() {
+        return tipo_habitacion;
+    }
+
+    public void setTipo_habitacion(int tipo_habitacion) {
+        this.tipo_habitacion = tipo_habitacion;
+    }
+}
+
+
+
+
+package sistemareservacion;
+
+import java.util.ArrayList;
+import java.util.Date;
+
+public class Reservacion {
+    private int cantidad_huepedes;
+    private int cantidad_noches;
+    private int id;
+    private static int conteo = 1;
+    private Habitacion habitacion_reservada;
+    private Date fecha_inicio;
+    private Date fecha_fin;
+    ArrayList<Huespedes> lista_huespedes;
+    private double costo_reservacion;
+
+    
+
+    public Reservacion(int cantidad_huepedes, int cantidad_noches, Habitacion habitacion_reservada, Date fecha_inicio, Date fecha_fin, ArrayList<Huespedes> lista_huespedes, double costo_reservacion) {
+        this.cantidad_huepedes = cantidad_huepedes;
+        this.cantidad_noches = cantidad_noches;
+        this.habitacion_reservada = habitacion_reservada;
+        this.fecha_inicio = fecha_inicio;
+        this.fecha_fin = fecha_fin;
+        this.lista_huespedes = lista_huespedes;
+        this.costo_reservacion = costo_reservacion;
+        this.id = conteo++;
+    }
+
+    public void mostrarDetalleReservacion(){
+        System.out.println("Identificado : " + id);
+        System.out.println("Cantidad de huespedes " + cantidad_huepedes);
+        System.out.println("Fecha inicio: " + fecha_inicio);
+        System.out.println("Fecha fin: " + fecha_fin);
+        System.out.println("Listado de huespedes");
+        for(int i = 0; i < lista_huespedes.size(); i++){
+            System.out.println("Nombre del huesped" + lista_huespedes.get(i).getNombre()  );
+            System.out.println("Edad del huesped" + lista_huespedes.get(i).getEdad()  );
+            int tipo = lista_huespedes.get(i).getTipo_huesped();
+            if(tipo == 1)
+                System.out.println("Reservó");
+            System.out.println("-------------------------------");
+        
+        }
+    }
+
+    public int getCantidad_huepedes() {
+        return cantidad_huepedes;
+    }
+
+    public void setCantidad_huepedes(int cantidad_huepedes) {
+        this.cantidad_huepedes = cantidad_huepedes;
+    }
+
+    public int getCantidad_noches() {
+        return cantidad_noches;
+    }
+
+    public void setCantidad_noches(int cantidad_noches) {
+        this.cantidad_noches = cantidad_noches;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public static int getConteo() {
+        return conteo;
+    }
+
+    public static void setConteo(int conteo) {
+        Reservacion.conteo = conteo;
+    }
+
+    public Habitacion getHabitacion_reservada() {
+        return habitacion_reservada;
+    }
+
+    public void setHabitacion_reservada(Habitacion habitacion_reservada) {
+        this.habitacion_reservada = habitacion_reservada;
+    }
+
+    public Date getFecha_inicio() {
+        return fecha_inicio;
+    }
+
+    public void setFecha_inicio(Date fecha_inicio) {
+        this.fecha_inicio = fecha_inicio;
+    }
+
+    public Date getFecha_fin() {
+        return fecha_fin;
+    }
+
+    public void setFecha_fin(Date fecha_fin) {
+        this.fecha_fin = fecha_fin;
+    }
+
+    public ArrayList<Huespedes> getLista_huespedes() {
+        return lista_huespedes;
+    }
+
+    public void setLista_huespedes(ArrayList<Huespedes> lista_huespedes) {
+        this.lista_huespedes = lista_huespedes;
+    }
+    
+    public double getCosto_reservacion() {
+        return costo_reservacion;
+    }
+
+    public void setCosto_reservacion(double costo_reservacion) {
+        this.costo_reservacion = costo_reservacion;
+    }
+    
+}
+
+
+package sistemareservacion;
+
+public class Huespedes {
+    private String nombre;
+    private int edad;
+    private int tipo_huesped;  // 1 reserva 2 huesped
+    
+    public Huespedes(String nombre, int edad, int tipo_huesped) {
+        this.nombre = nombre;
+        this.edad = edad;
+        this.tipo_huesped = tipo_huesped;
+    }
+        
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public int getEdad() {
+        return edad;
+    }
+
+    public void setEdad(int edad) {
+        this.edad = edad;
+    }
+
+    public int getTipo_huesped() {
+        return tipo_huesped;
+    }
+
+    public void setTipo_huesped(int tipo_huesped) {
+        this.tipo_huesped = tipo_huesped;
+    }
+    
+    
+}
